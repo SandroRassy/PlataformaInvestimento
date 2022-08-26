@@ -24,6 +24,14 @@ namespace Layer.UnitTests.System.Base
         public readonly UsuarioPosicaoServices _usuarioPosicaoServices;
         public readonly TendenciaServices _tendenciaServices;
 
+        static TestBase()
+        {
+            Configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile($"appsettings.json")
+            .AddEnvironmentVariables().Build();
+        }
+
         public TestBase()
         {
             mongoDbSettings = Configuration.GetSection("MongoDatabase").Get<MongoDBSetting>();

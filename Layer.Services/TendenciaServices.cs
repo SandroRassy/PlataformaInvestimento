@@ -29,6 +29,9 @@ namespace Layer.Services
                 if (!(obj.CurrentPrice > 0))
                     throw new Exception($"Valor da currentprice precisa ser maior que zero.");
 
+                if (String.IsNullOrEmpty(obj.Symbol))
+                    throw new Exception($"Valor da currentprice precisa ser maior que zero.");
+
                 _tendenciaRepository.Insert(obj);
             }
             else
