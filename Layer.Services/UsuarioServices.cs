@@ -15,9 +15,11 @@ namespace Layer.Services
     public class UsuarioServices : Services<Usuario>, IUsuarioService
     {
         private readonly IUsuarioRepository _usuarioRepository;
-        public UsuarioServices(IUsuarioRepository usuarioRepository) : base(usuarioRepository)
+        private readonly IUsuarioPosicaoRepository _usuarioPosicaoRepository;
+        public UsuarioServices(IUsuarioRepository usuarioRepository, IUsuarioPosicaoRepository usuarioPosicaoRepository) : base(usuarioRepository)
         {
             _usuarioRepository = usuarioRepository;
+            _usuarioPosicaoRepository = usuarioPosicaoRepository;
         }
 
         public void Inserir(string nome, string codigoconta, string cpf)
@@ -37,6 +39,10 @@ namespace Layer.Services
                 throw new Exception($"CPF Inválido!");
 
             _usuarioRepository.Insert(obj);
+
+            var posicao = new UsuarioPosicao(cpf, 0, 0);
+
+            _usuarioPosicaoRepository.Insert(posicao);
         }
 
         public Usuario QueryFilter(string cpf)
