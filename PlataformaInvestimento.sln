@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32811.315
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Layer.API", "Layer.API\Layer.API.csproj", "{C5543001-19E2-48A4-A155-C18C9134D568}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Layer.API", "Layer.API\Layer.API.csproj", "{C5543001-19E2-48A4-A155-C18C9134D568}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Layer.Domain", "Layer.Domain\Layer.Domain.csproj", "{6DF37D83-AF4C-4DC0-B5F6-C1A47E8836BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Layer.Domain", "Layer.Domain\Layer.Domain.csproj", "{6DF37D83-AF4C-4DC0-B5F6-C1A47E8836BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Layer.Repository", "Layer.Repository\Layer.Repository.csproj", "{291ABFC1-C0B9-4B9E-8240-FF365208AF3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Layer.Repository", "Layer.Repository\Layer.Repository.csproj", "{291ABFC1-C0B9-4B9E-8240-FF365208AF3A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Layer.Services", "Layer.Services\Layer.Services.csproj", "{E66D16B8-822E-4D63-B4A3-5880BD0C33A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Layer.Services", "Layer.Services\Layer.Services.csproj", "{E66D16B8-822E-4D63-B4A3-5880BD0C33A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Layer.UnitTests", "Layer.UnitTests\Layer.UnitTests.csproj", "{DA37C978-748B-4C71-9B6B-22C91B38EDA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{E66D16B8-822E-4D63-B4A3-5880BD0C33A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E66D16B8-822E-4D63-B4A3-5880BD0C33A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E66D16B8-822E-4D63-B4A3-5880BD0C33A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA37C978-748B-4C71-9B6B-22C91B38EDA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA37C978-748B-4C71-9B6B-22C91B38EDA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA37C978-748B-4C71-9B6B-22C91B38EDA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA37C978-748B-4C71-9B6B-22C91B38EDA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
