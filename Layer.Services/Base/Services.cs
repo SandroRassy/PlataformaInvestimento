@@ -16,7 +16,7 @@ namespace Layer.Services.Base
             _repository = repository;
         }
 
-        public void Insert(T obj)
+        protected void Insert(T obj)
         {
             _repository.Insert(obj);
         }
