@@ -55,6 +55,13 @@ namespace Layer.Services
             _channel.BasicPublish(exchangeName, routingKey, null, data);
 
             return Task.CompletedTask;
-        }        
+        }
+
+        public IModel? Canal()
+        {
+            Conectar(_uri);
+            _channel.QueueDeclare(_queueName, _durable, _exclusive, _autoDelete, arqs);
+            return _channel;
+        }
     }
 }

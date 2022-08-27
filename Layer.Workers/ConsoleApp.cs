@@ -6,52 +6,62 @@ using System.Text;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Microsoft.Extensions.Configuration;
+using Layer.Services.Interfaces;
+using Layer.Services;
 
 namespace Layer.Workers
 {
     public class ConsoleApp
     {
-        private readonly IUsuarioPosicaoRepository _usuarioPosicaoRepository;
-        public ConsoleApp(IUsuarioPosicaoRepository usuarioPosicaoRepository)
+        private readonly IUsuarioPosicaoService _usuarioPosicaoService;
+        private readonly IConfigurationRoot _configuration;
+        private readonly IFilaService _filaService;
+        public ConsoleApp(IUsuarioPosicaoService usuarioPosicaoService, IConfigurationRoot configuration, IFilaService filaService)
         {
-            _usuarioPosicaoRepository = usuarioPosicaoRepository;
+            _usuarioPosicaoService = usuarioPosicaoService;
+            _configuration = configuration;
+            _filaService = filaService;
         }
 
         public void Run()
         {
-            var teste = _usuarioPosicaoRepository.QueryFilter("08309184778");
-            
-            var factory = new ConnectionFactory
-            {
-                Uri = new Uri("amqps://zpnseqco:7cUFexcS37KfRZ0w0Q2F7PZYYJ-nWJMs@beaver.rmq.cloudamqp.com/zpnseqco")
-            };
-            var connection = factory.CreateConnection();
-            using var channel = connection.CreateModel();
-            var queueName = "UsuarioPosicao";
-            bool durable = true;
-            bool exclusive = false;
-            bool autoDelete = false;
+            var queueName = _configuration["UsuarioPosicaoFila:queueName"];
 
-            Dictionary<string, object> args = new Dictionary<string, object>()
-            {
-                { "x-queue-mode", "lazy" }
-            };
+            IniciarFila(queueName);
 
-            channel.QueueDeclare(queueName, durable, exclusive, autoDelete, args);
+            using var channel = _filaService.Canal();
 
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (model, eventArgs) =>
             {
                 var body = eventArgs.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
+                _usuarioPosicaoService.Processar(message);
 
                 Console.WriteLine($"Message received: {message}");
+                //Console.WriteLine($"CPF: {teste.CPF}");
             };
 
             channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
 
             Console.ReadKey();
 
+        }
+
+        private void IniciarFila(string queuename)
+        {            
+            var durable = bool.Parse(_configuration["UsuarioPosicaoFila:durable"]);
+            var exclusive = bool.Parse(_configuration["UsuarioPosicaoFila:exclusive"]);
+            var autoDelete = bool.Parse(_configuration["UsuarioPosicaoFila:autoDelete"]);
+            var uri = _configuration["RabbitMq:uri"];
+
+            Dictionary<string, object> args = new Dictionary<string, object>()
+            {
+                { "x-queue-mode", _configuration["UsuarioPosicaoFila:x-queue-mode"] }
+            };
+
+            _filaService.ConfigFila(uri, queuename, durable, exclusive, autoDelete, args);            
         }
     }
 }

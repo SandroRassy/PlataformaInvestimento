@@ -12,5 +12,6 @@ namespace Layer.Services.Interfaces
     {
         Task Publicar(UsuarioPosicaoShared usuarioPosicao);        
         void ConfigFila(string uri, string queuename, bool durable, bool exclusive, bool autoDelete, Dictionary<string, object> _arqs);
+        IModel? Canal();
     }
 }

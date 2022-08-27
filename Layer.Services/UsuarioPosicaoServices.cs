@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 
@@ -19,6 +20,7 @@ namespace Layer.Services
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IFilaService _filaService;
         private readonly IConfiguration _configuration;
+        private double _totalCompra = 0;
         public UsuarioPosicaoServices(IUsuarioPosicaoRepository usuarioPosicaoRepository, IUsuarioRepository  usuarioRepository, IFilaService filaService, IConfiguration configuration) : base(usuarioPosicaoRepository)
         {
             _usuarioPosicaoRepository = usuarioPosicaoRepository;
@@ -90,6 +92,8 @@ namespace Layer.Services
                 totalCompra = +posicao.CurrentPrice;
             }
 
+            _totalCompra = totalCompra;
+
             if (saldo > totalCompra)
                 return true;
             else
@@ -108,6 +112,46 @@ namespace Layer.Services
             }
 
             return retorno;
+        }
+
+        private UsuarioPosicao FillPayloadShared(UsuarioPosicaoShared usuarioposicao)
+        {
+            var retorno = new UsuarioPosicao();
+            retorno.CPF = usuarioposicao.CPF;
+
+            foreach (var posicao in usuarioposicao.Positions)
+            {
+                var novaposicao = new Posicao(posicao.Symbol, posicao.Amount, posicao.CurrentPrice);
+                retorno.Positions.Add(novaposicao);
+            }
+
+            return retorno;
+        }
+
+        public void Processar(string payload)
+        {
+            var _payload = JsonSerializer.Deserialize<UsuarioPosicaoShared>(payload);
+
+            if( _payload != null)
+            {
+                var posicaoAtual = _usuarioPosicaoRepository.QueryFilter(_payload.CPF);
+
+                if (posicaoAtual.CheckingAccountAmount > 0)
+                {
+                    var posicaoNova = FillPayloadShared(_payload);
+
+                    if (VerificarSaldoConta(posicaoNova, posicaoAtual.CheckingAccountAmount))
+                    {
+                        //debitar o valor da compra
+                        posicaoAtual.CheckingAccountAmount =-_totalCompra;
+
+                        posicaoAtual.Positions.AddRange(posicaoNova.Positions);
+
+                        _usuarioPosicaoRepository.Update(posicaoAtual);
+                    }
+                }
+
+            }           
         }
     }
 }
