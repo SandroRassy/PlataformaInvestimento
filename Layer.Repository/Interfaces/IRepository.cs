@@ -11,5 +11,6 @@ namespace Layer.Repository.Interfaces
         IQueryable<T> QueryAll();
         T Query(Guid key);
         void Insert(T obj);
+        void Update(T obj);
     }
 }

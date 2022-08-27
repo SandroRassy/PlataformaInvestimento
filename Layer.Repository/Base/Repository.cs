@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,6 +38,12 @@ namespace Layer.Repository.Base
         public IQueryable<T> QueryAll()
         {
             return _collectionName.AsQueryable<T>();
+        }
+
+        public void Update(T obj)
+        {
+            Expression<Func<T, bool>> filter = x => x.Key.Equals(obj.Key);
+            _collectionName.ReplaceOne(filter, obj);
         }
     }
 }
