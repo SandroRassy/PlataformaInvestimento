@@ -3,11 +3,13 @@ using Layer.Repository.Interfaces;
 using Layer.Services.Base;
 using Layer.Services.Interfaces;
 using Layer.Services.Models.Shared;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace Layer.Services
 {    
@@ -16,11 +18,13 @@ namespace Layer.Services
         private readonly IUsuarioPosicaoRepository _usuarioPosicaoRepository;
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IFilaService _filaService;
-        public UsuarioPosicaoServices(IUsuarioPosicaoRepository usuarioPosicaoRepository, IUsuarioRepository  usuarioRepository, IFilaService filaService) : base(usuarioPosicaoRepository)
+        private readonly IConfiguration _configuration;
+        public UsuarioPosicaoServices(IUsuarioPosicaoRepository usuarioPosicaoRepository, IUsuarioRepository  usuarioRepository, IFilaService filaService, IConfiguration configuration) : base(usuarioPosicaoRepository)
         {
             _usuarioPosicaoRepository = usuarioPosicaoRepository;
             _usuarioRepository = usuarioRepository;
             _filaService = filaService;
+            _configuration = configuration;
         }
 
         public void Inserir(UsuarioPosicao usuarioposicao)
@@ -42,7 +46,21 @@ namespace Layer.Services
                     //validar se o cliente tem saldo para comprar as ações
                     if (VerificarSaldoConta(usuarioposicao, posicao.CheckingAccountAmount))
                     {
+                        var queueName = _configuration["UsuarioPosicaoFila:queueName"];
+                        var durable = bool.Parse(_configuration["UsuarioPosicaoFila:durable"]);
+                        var exclusive = bool.Parse(_configuration["UsuarioPosicaoFila:exclusive"]);
+                        var autoDelete = bool.Parse(_configuration["UsuarioPosicaoFila:autoDelete"]);
+                        var uri = _configuration["RabbitMq:uri"];
+
+                        Dictionary<string, object> args = new Dictionary<string, object>()
+                        {
+                            { "x-queue-mode", _configuration["UsuarioPosicaoFila:x-queue-mode"] }
+                        };
+
+                        _filaService.ConfigFila(uri, queueName, durable, exclusive, autoDelete, args);
                         _filaService.Publicar(FillPayload(usuarioposicao));
+
+
                     }
                     else
                          throw new Exception($"Usuário não tem saldo suficiente.");

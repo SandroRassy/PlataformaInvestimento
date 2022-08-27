@@ -11,6 +11,6 @@ namespace Layer.Services.Interfaces
     public interface IFilaService
     {
         Task Publicar(UsuarioPosicaoShared usuarioPosicao);        
-        void ConfigFila(string queuename, bool durable, bool exclusive, bool autoDelete, Dictionary<string, object> _arqs);
+        void ConfigFila(string uri, string queuename, bool durable, bool exclusive, bool autoDelete, Dictionary<string, object> _arqs);
     }
 }
