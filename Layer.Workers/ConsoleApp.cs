@@ -27,6 +27,7 @@ namespace Layer.Workers
             };
             var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
+            var queueName = "UsuarioPosicao";
             bool durable = true;
             bool exclusive = false;
             bool autoDelete = false;
@@ -36,7 +37,7 @@ namespace Layer.Workers
                 { "x-queue-mode", "lazy" }
             };
 
-            channel.QueueDeclare("UsuarioPosicaoShared", durable, exclusive, autoDelete, args);
+            channel.QueueDeclare(queueName, durable, exclusive, autoDelete, args);
 
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (model, eventArgs) =>
@@ -47,7 +48,7 @@ namespace Layer.Workers
                 Console.WriteLine($"Message received: {message}");
             };
 
-            channel.BasicConsume(queue: "UsuarioPosicaoShared", autoAck: true, consumer: consumer);
+            channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
 
             Console.ReadKey();
 

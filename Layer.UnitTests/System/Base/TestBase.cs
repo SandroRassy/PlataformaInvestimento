@@ -3,7 +3,6 @@ using Layer.Domain.Settings;
 using Layer.Repository;
 using Layer.Repository.Context;
 using Layer.Services;
-using MassTransit;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
