@@ -26,6 +26,7 @@ builder.Services.AddSingleton<ITendenciaRepository>(p => new TendenciaRepository
 builder.Services.AddTransient<IUsuarioService, UsuarioServices>();
 builder.Services.AddTransient<IUsuarioPosicaoService, UsuarioPosicaoServices>();
 builder.Services.AddTransient<ITendenciaService, TendenciaServices>();
+builder.Services.AddTransient<IFilaService, FilaService>();
 
 builder.Services.AddMassTransitExtension(builder.Configuration);
 

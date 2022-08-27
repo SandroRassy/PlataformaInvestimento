@@ -3,6 +3,7 @@ using Layer.Domain.Settings;
 using Layer.Repository;
 using Layer.Repository.Context;
 using Layer.Services;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -20,9 +21,9 @@ namespace Layer.UnitTests.System.Base
         public readonly UsuarioRepository _usuarioRepository;
         public readonly UsuarioPosicaoRepository _usuarioPosicaoRepository;
         public readonly TendenciaRepository _tendenciaRepository;
-        public readonly UsuarioServices _usuarioServices;
-        public readonly UsuarioPosicaoServices _usuarioPosicaoServices;
+        public readonly UsuarioServices _usuarioServices;        
         public readonly TendenciaServices _tendenciaServices;
+               
 
         static TestBase()
         {
@@ -40,9 +41,8 @@ namespace Layer.UnitTests.System.Base
             _usuarioRepository = new UsuarioRepository(connectionFactory, mongoDbSettings.DatabaseName, MongoDBCollections.CNUsuarios.ToString());
             _usuarioPosicaoRepository = new UsuarioPosicaoRepository(connectionFactory, mongoDbSettings.DatabaseName, MongoDBCollections.CNUsuariosPosicao.ToString());
             _tendenciaRepository = new TendenciaRepository(connectionFactory, mongoDbSettings.DatabaseName, MongoDBCollections.CNTendencias.ToString());
-
-            _usuarioServices = new UsuarioServices(_usuarioRepository);
-            _usuarioPosicaoServices = new UsuarioPosicaoServices(_usuarioPosicaoRepository);
+            
+            _usuarioServices = new UsuarioServices(_usuarioRepository, _usuarioPosicaoRepository);            
             _tendenciaServices = new TendenciaServices(_tendenciaRepository);
         }
     }
