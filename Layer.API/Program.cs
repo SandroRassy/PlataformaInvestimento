@@ -4,7 +4,6 @@ using Layer.Repository;
 using Layer.Repository.Context;
 using Layer.Repository.Interfaces;
 using Layer.Services;
-using Layer.Services.Extensions;
 using Layer.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,8 +26,6 @@ builder.Services.AddTransient<IUsuarioService, UsuarioServices>();
 builder.Services.AddTransient<IUsuarioPosicaoService, UsuarioPosicaoServices>();
 builder.Services.AddTransient<ITendenciaService, TendenciaServices>();
 builder.Services.AddTransient<IFilaService, FilaService>();
-
-builder.Services.AddMassTransitExtension(builder.Configuration);
 
 var app = builder.Build();
 
