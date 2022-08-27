@@ -1,4 +1,5 @@
 ﻿using Layer.Services.Models.Shared;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace Layer.Services.Interfaces
 {
     public interface IFilaService
     {
-        Task Publicar(UsuarioPosicaoShared usuarioPosicao);
+        Task Publicar(UsuarioPosicaoShared usuarioPosicao);        
+        void ConfigFila(string queuename, bool durable, bool exclusive, bool autoDelete, Dictionary<string, object> _arqs);
     }
 }
