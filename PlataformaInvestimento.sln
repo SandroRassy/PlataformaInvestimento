@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Layer.Repository", "Layer.R
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Layer.Services", "Layer.Services\Layer.Services.csproj", "{E66D16B8-822E-4D63-B4A3-5880BD0C33A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Layer.UnitTests", "Layer.UnitTests\Layer.UnitTests.csproj", "{DA37C978-748B-4C71-9B6B-22C91B38EDA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Layer.UnitTests", "Layer.UnitTests\Layer.UnitTests.csproj", "{DA37C978-748B-4C71-9B6B-22C91B38EDA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Layer.Workers", "Layer.Workers\Layer.Workers.csproj", "{5D23064C-2BB0-4BDA-AE2D-1B797181C4EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{DA37C978-748B-4C71-9B6B-22C91B38EDA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA37C978-748B-4C71-9B6B-22C91B38EDA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA37C978-748B-4C71-9B6B-22C91B38EDA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D23064C-2BB0-4BDA-AE2D-1B797181C4EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D23064C-2BB0-4BDA-AE2D-1B797181C4EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D23064C-2BB0-4BDA-AE2D-1B797181C4EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D23064C-2BB0-4BDA-AE2D-1B797181C4EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
