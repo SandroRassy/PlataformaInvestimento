@@ -9,24 +9,27 @@ using RabbitMQ.Client.Events;
 using Microsoft.Extensions.Configuration;
 using Layer.Services.Interfaces;
 using Layer.Services;
+using Layer.Domain.Entities;
 
 namespace Layer.Workers
 {
     public class ConsoleApp
     {
         private readonly IUsuarioPosicaoService _usuarioPosicaoService;
-        private readonly IConfigurationRoot _configuration;
+        private readonly IHistoricoTransacoesService _historicoTransacoesService;
+        private readonly IConfigRabbit _configRabbit;
         private readonly IFilaService _filaService;
-        public ConsoleApp(IUsuarioPosicaoService usuarioPosicaoService, IConfigurationRoot configuration, IFilaService filaService)
+        public ConsoleApp(IUsuarioPosicaoService usuarioPosicaoService, IConfigRabbit configrabbit, IFilaService filaService, IHistoricoTransacoesService historicoTransacoesService)
         {
             _usuarioPosicaoService = usuarioPosicaoService;
-            _configuration = configuration;
+            _configRabbit = configrabbit;
             _filaService = filaService;
+            _historicoTransacoesService = historicoTransacoesService;
         }
 
         public void Run()
         {
-            var queueName = _configuration["UsuarioPosicaoFila:queueName"];
+            var queueName = _configRabbit.QueueName;
 
             IniciarFila(queueName);
 
@@ -37,10 +40,24 @@ namespace Layer.Workers
             {
                 var body = eventArgs.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
-                _usuarioPosicaoService.Processar(message);
+                try
+                {
+                    _usuarioPosicaoService.Processar(message);
+                }
+                catch (Exception ex)
+                {
+                    var historicotransacoes = new HistoricoTransacoes();    
+                    
+                    historicotransacoes.DataTransacao = DateTime.Now;
+                    historicotransacoes.Payload = message;
+                    historicotransacoes.Obs = $"Erro ao processar o payload. erro: {ex.Message}";
+                    historicotransacoes.Status = 3;
 
-                Console.WriteLine($"Message received: {message}");
-                //Console.WriteLine($"CPF: {teste.CPF}");
+                    _historicoTransacoesService.Inserir(historicotransacoes);
+                }
+                
+
+                Console.WriteLine($"Message received: {message}");                
             };
 
             channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
@@ -51,14 +68,14 @@ namespace Layer.Workers
 
         private void IniciarFila(string queuename)
         {            
-            var durable = bool.Parse(_configuration["UsuarioPosicaoFila:durable"]);
-            var exclusive = bool.Parse(_configuration["UsuarioPosicaoFila:exclusive"]);
-            var autoDelete = bool.Parse(_configuration["UsuarioPosicaoFila:autoDelete"]);
-            var uri = _configuration["RabbitMq:uri"];
+            var durable = _configRabbit.Durable;
+            var exclusive = _configRabbit.Exclusive;
+            var autoDelete = _configRabbit.AutoDelete;
+            var uri = _configRabbit.Uri;
 
             Dictionary<string, object> args = new Dictionary<string, object>()
             {
-                { "x-queue-mode", _configuration["UsuarioPosicaoFila:x-queue-mode"] }
+                { "x-queue-mode", _configRabbit.XQueueMode }
             };
 
             _filaService.ConfigFila(uri, queuename, durable, exclusive, autoDelete, args);            

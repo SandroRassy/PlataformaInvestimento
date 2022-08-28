@@ -18,15 +18,17 @@ namespace Layer.Services
     {
         private readonly IUsuarioPosicaoRepository _usuarioPosicaoRepository;
         private readonly IUsuarioRepository _usuarioRepository;
-        private readonly IFilaService _filaService;
-        private readonly IConfiguration _configuration;
-        private double _totalCompra = 0;
-        public UsuarioPosicaoServices(IUsuarioPosicaoRepository usuarioPosicaoRepository, IUsuarioRepository  usuarioRepository, IFilaService filaService, IConfiguration configuration) : base(usuarioPosicaoRepository)
+        private readonly IHistoricoTransacoesService _historicoTransacoesService;
+        private readonly IFilaService _filaService;        
+        private readonly IConfigRabbit _configRabbit;
+        private double _totalCompra = 0;        
+        public UsuarioPosicaoServices(IUsuarioPosicaoRepository usuarioPosicaoRepository, IUsuarioRepository  usuarioRepository, IFilaService filaService, IConfigRabbit _configrabbit, IHistoricoTransacoesService historicoTransacoesService) : base(usuarioPosicaoRepository)
         {
             _usuarioPosicaoRepository = usuarioPosicaoRepository;
             _usuarioRepository = usuarioRepository;
+            _historicoTransacoesService = historicoTransacoesService;
             _filaService = filaService;
-            _configuration = configuration;
+            _configRabbit = _configrabbit;
         }
 
         public void Inserir(UsuarioPosicao usuarioposicao)
@@ -47,19 +49,13 @@ namespace Layer.Services
 
                     //validar se o cliente tem saldo para comprar as ações
                     if (VerificarSaldoConta(usuarioposicao, posicao.CheckingAccountAmount))
-                    {
-                        var queueName = _configuration["UsuarioPosicaoFila:queueName"];
-                        var durable = bool.Parse(_configuration["UsuarioPosicaoFila:durable"]);
-                        var exclusive = bool.Parse(_configuration["UsuarioPosicaoFila:exclusive"]);
-                        var autoDelete = bool.Parse(_configuration["UsuarioPosicaoFila:autoDelete"]);
-                        var uri = _configuration["RabbitMq:uri"];
-
+                    {                        
                         Dictionary<string, object> args = new Dictionary<string, object>()
                         {
-                            { "x-queue-mode", _configuration["UsuarioPosicaoFila:x-queue-mode"] }
+                            { "x-queue-mode", _configRabbit.XQueueMode }
                         };
 
-                        _filaService.ConfigFila(uri, queueName, durable, exclusive, autoDelete, args);
+                        _filaService.ConfigFila(_configRabbit.Uri, _configRabbit.QueueName, _configRabbit.Durable, _configRabbit.Exclusive, _configRabbit.AutoDelete, args);
                         _filaService.Publicar(FillPayload(usuarioposicao));
 
 
@@ -100,6 +96,16 @@ namespace Layer.Services
                 return false;
         }
 
+        private double TotalValorPosicoes(UsuarioPosicao usuarioposicao)
+        {            
+            double valor = 0;
+            foreach (var posicao in usuarioposicao.Positions)
+            {
+                valor = +(posicao.CurrentPrice * double.Parse(posicao.Amount));
+            }   
+            return valor;
+        }
+
         private UsuarioPosicaoShared FillPayload(UsuarioPosicao usuarioposicao)
         {
             var retorno = new UsuarioPosicaoShared();
@@ -118,6 +124,7 @@ namespace Layer.Services
         {
             var retorno = new UsuarioPosicao();
             retorno.CPF = usuarioposicao.CPF;
+            retorno.Positions = new List<Posicao>();
 
             foreach (var posicao in usuarioposicao.Positions)
             {
@@ -130,10 +137,15 @@ namespace Layer.Services
 
         public void Processar(string payload)
         {
-            var _payload = JsonSerializer.Deserialize<UsuarioPosicaoShared>(payload);
+            var _payload = JsonSerializer.Deserialize<UsuarioPosicaoShared>(payload);                     
 
-            if( _payload != null)
+            if ( _payload != null)
             {
+                var historicotransacoes = new HistoricoTransacoes();
+                historicotransacoes.CPF = _payload.CPF;
+                historicotransacoes.DataTransacao = DateTime.Now;
+                historicotransacoes.Payload = payload;
+
                 var posicaoAtual = _usuarioPosicaoRepository.QueryFilter(_payload.CPF);
 
                 if (posicaoAtual.CheckingAccountAmount > 0)
@@ -143,14 +155,32 @@ namespace Layer.Services
                     if (VerificarSaldoConta(posicaoNova, posicaoAtual.CheckingAccountAmount))
                     {
                         //debitar o valor da compra
-                        posicaoAtual.CheckingAccountAmount =-_totalCompra;
+                        posicaoAtual.CheckingAccountAmount = posicaoAtual.CheckingAccountAmount - _totalCompra;                        
+
+                        if (posicaoAtual.Positions == null)
+                            posicaoAtual.Positions = new List<Posicao>();
 
                         posicaoAtual.Positions.AddRange(posicaoNova.Positions);
 
+                        //calcular  Consolidated                      
+                        posicaoAtual.Consolidated = posicaoAtual.CheckingAccountAmount + TotalValorPosicoes(posicaoAtual);
+
                         _usuarioPosicaoRepository.Update(posicaoAtual);
+
+                        historicotransacoes.Status = 1;
+                    }
+                    else
+                    {
+                        historicotransacoes.Obs = $"O cliente não tem saldo para efetuar a compra";
+                        historicotransacoes.Status = 2;
                     }
                 }
-
+                else
+                {
+                    historicotransacoes.Obs = $"O Saldo do cliente não pode ser vazio";
+                    historicotransacoes.Status = 2;
+                }
+                _historicoTransacoesService.Inserir(historicotransacoes);
             }           
         }
     }
