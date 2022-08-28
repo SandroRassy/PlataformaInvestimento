@@ -6,52 +6,79 @@ using System.Text;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Microsoft.Extensions.Configuration;
+using Layer.Services.Interfaces;
+using Layer.Services;
+using Layer.Domain.Entities;
 
 namespace Layer.Workers
 {
     public class ConsoleApp
     {
-        private readonly IUsuarioPosicaoRepository _usuarioPosicaoRepository;
-        public ConsoleApp(IUsuarioPosicaoRepository usuarioPosicaoRepository)
+        private readonly IUsuarioPosicaoService _usuarioPosicaoService;
+        private readonly IHistoricoTransacoesService _historicoTransacoesService;
+        private readonly IConfigRabbit _configRabbit;
+        private readonly IFilaService _filaService;
+        public ConsoleApp(IUsuarioPosicaoService usuarioPosicaoService, IConfigRabbit configrabbit, IFilaService filaService, IHistoricoTransacoesService historicoTransacoesService)
         {
-            _usuarioPosicaoRepository = usuarioPosicaoRepository;
+            _usuarioPosicaoService = usuarioPosicaoService;
+            _configRabbit = configrabbit;
+            _filaService = filaService;
+            _historicoTransacoesService = historicoTransacoesService;
         }
 
         public void Run()
         {
-            var teste = _usuarioPosicaoRepository.QueryFilter("08309184778");
-            
-            var factory = new ConnectionFactory
-            {
-                Uri = new Uri("amqps://zpnseqco:7cUFexcS37KfRZ0w0Q2F7PZYYJ-nWJMs@beaver.rmq.cloudamqp.com/zpnseqco")
-            };
-            var connection = factory.CreateConnection();
-            using var channel = connection.CreateModel();
-            var queueName = "UsuarioPosicao";
-            bool durable = true;
-            bool exclusive = false;
-            bool autoDelete = false;
+            var queueName = _configRabbit.QueueName;
 
-            Dictionary<string, object> args = new Dictionary<string, object>()
-            {
-                { "x-queue-mode", "lazy" }
-            };
+            IniciarFila(queueName);
 
-            channel.QueueDeclare(queueName, durable, exclusive, autoDelete, args);
+            using var channel = _filaService.Canal();
 
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (model, eventArgs) =>
             {
                 var body = eventArgs.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
+                try
+                {
+                    _usuarioPosicaoService.Processar(message);
+                }
+                catch (Exception ex)
+                {
+                    var historicotransacoes = new HistoricoTransacoes();    
+                    
+                    historicotransacoes.DataTransacao = DateTime.Now;
+                    historicotransacoes.Payload = message;
+                    historicotransacoes.Obs = $"Erro ao processar o payload. erro: {ex.Message}";
+                    historicotransacoes.Status = 3;
 
-                Console.WriteLine($"Message received: {message}");
+                    _historicoTransacoesService.Inserir(historicotransacoes);
+                }
+                
+
+                Console.WriteLine($"Message received: {message}");                
             };
 
             channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
 
             Console.ReadKey();
 
+        }
+
+        private void IniciarFila(string queuename)
+        {            
+            var durable = _configRabbit.Durable;
+            var exclusive = _configRabbit.Exclusive;
+            var autoDelete = _configRabbit.AutoDelete;
+            var uri = _configRabbit.Uri;
+
+            Dictionary<string, object> args = new Dictionary<string, object>()
+            {
+                { "x-queue-mode", _configRabbit.XQueueMode }
+            };
+
+            _filaService.ConfigFila(uri, queuename, durable, exclusive, autoDelete, args);            
         }
     }
 }

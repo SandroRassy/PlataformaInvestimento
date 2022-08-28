@@ -2,5 +2,6 @@
 {
     CNTendencias,
     CNUsuarios,
-    CNUsuariosPosicao
+    CNUsuariosPosicao,
+    CNHistoricoTransacoes
 }

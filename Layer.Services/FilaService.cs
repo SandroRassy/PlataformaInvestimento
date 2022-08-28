@@ -13,6 +13,7 @@ namespace Layer.Services
         private IConnection _connection;
         private IModel? _channel;
 
+        private string _uri;
         private string _queueName;
         private bool _durable;
         private bool _exclusive;
@@ -25,13 +26,13 @@ namespace Layer.Services
             
         }
 
-        public void ConfigFila(string queuename, bool durable, bool exclusive, bool autoDelete, Dictionary<string, object> _arqs)
+        public void ConfigFila(string uri, string queuename, bool durable, bool exclusive, bool autoDelete, Dictionary<string, object> _arqs)
         {
+            _uri = uri;
             _queueName = queuename;
             _durable = durable;
             _exclusive = exclusive;
-            _autoDelete = autoDelete;
-            arqs = new Dictionary<string, object>();
+            _autoDelete = autoDelete;            
             arqs = _arqs;
         }
 
@@ -44,18 +45,7 @@ namespace Layer.Services
 
         public Task Publicar(UsuarioPosicaoShared usuarioPosicao)
         {
-            Conectar("amqps://zpnseqco:7cUFexcS37KfRZ0w0Q2F7PZYYJ-nWJMs@beaver.rmq.cloudamqp.com/zpnseqco");           
-            
-            //_queueName = "UsuarioPosicao";
-            //_durable = true;
-            //_exclusive = false;
-            //_autoDelete = false;
-
-            //Dictionary<string, object> args = new Dictionary<string, object>()
-            //{
-            //    { "x-queue-mode", "lazy" }
-            //};
-
+            Conectar(_uri);                                  
             _channel.QueueDeclare(_queueName, _durable, _exclusive, _autoDelete, arqs);
 
             string message = JsonSerializer.Serialize(usuarioPosicao);            
@@ -65,6 +55,13 @@ namespace Layer.Services
             _channel.BasicPublish(exchangeName, routingKey, null, data);
 
             return Task.CompletedTask;
-        }        
+        }
+
+        public IModel? Canal()
+        {
+            Conectar(_uri);
+            _channel.QueueDeclare(_queueName, _durable, _exclusive, _autoDelete, arqs);
+            return _channel;
+        }
     }
 }

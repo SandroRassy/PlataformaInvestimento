@@ -11,5 +11,7 @@ namespace Layer.Services.Interfaces
     {
         UsuarioPosicao QueryFilter(string cpf);
         void Inserir(UsuarioPosicao usuarioposicao);
+
+        void Processar(string payload);
     }
 }
