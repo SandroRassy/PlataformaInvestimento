@@ -2,11 +2,6 @@
 using Layer.Repository.Base;
 using Layer.Repository.Interfaces;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Layer.Repository
 {
@@ -21,6 +16,6 @@ namespace Layer.Repository
         {
         }
 
-        
+
     }
 }

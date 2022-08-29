@@ -1,9 +1,4 @@
 ﻿using Layer.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Layer.Services
 {
@@ -16,7 +11,7 @@ namespace Layer.Services
         public string Uri { get; set; }
         public string XQueueMode { get; set; }
 
-        public ConfigRabbitUsuarioPosicao(string queuename,bool durable, bool exclusive, bool autoDelete, string uri, string xqueuemode)
+        public ConfigRabbitUsuarioPosicao(string queuename, bool durable, bool exclusive, bool autoDelete, string uri, string xqueuemode)
         {
             QueueName = queuename;
             Durable = durable;

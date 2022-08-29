@@ -1,10 +1,7 @@
 ﻿using Layer.API.Models.DTO;
 using Layer.Domain.Entities;
-using Layer.Repository.Interfaces;
-using Layer.Services;
 using Layer.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,7 +17,7 @@ namespace Layer.API.Controllers
         {
             _usuarioPosicaoServices = usuarioPosicaoServices;
             _tendenciaServices = tendenciaServices;
-        }        
+        }
 
         // GET api/<UsuarioPosicaoController>/5
         [HttpGet("{cpf}")]
@@ -28,7 +25,7 @@ namespace Layer.API.Controllers
         {
             try
             {
-                return Ok(_usuarioPosicaoServices.QueryFilter(cpf));   
+                return Ok(_usuarioPosicaoServices.QueryFilter(cpf));
             }
             catch (Exception exception)
             {
@@ -42,10 +39,10 @@ namespace Layer.API.Controllers
         {
             try
             {
-                
-                
+
+
                 var valorProduto = _tendenciaServices.QueryFilter(value.symbol);
-                if(valorProduto != null)
+                if (valorProduto != null)
                 {
                     UsuarioPosicao posicao = PosicaoFill(value, valorProduto.CurrentPrice);
 
@@ -56,7 +53,7 @@ namespace Layer.API.Controllers
                 {
                     return BadRequest($"Produto não encontrado.");
                 }
-                
+
             }
             catch (Exception exception)
             {
@@ -69,8 +66,8 @@ namespace Layer.API.Controllers
             var posicao = new UsuarioPosicao();
 
             posicao.CPF = value.cpf;
-            posicao.Positions = new List<Posicao>();            
-            posicao.Positions.Add(new Posicao(value.symbol, value.amount, valor));            
+            posicao.Positions = new List<Posicao>();
+            posicao.Positions.Add(new Posicao(value.symbol, value.amount, valor));
 
             return posicao;
         }

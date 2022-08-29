@@ -1,9 +1,8 @@
 ﻿using Layer.Services.Interfaces;
 using Layer.Services.Models.Shared;
-using System.Text.Json;
 using RabbitMQ.Client;
-using System;
 using System.Text;
+using System.Text.Json;
 
 namespace Layer.Services
 {
@@ -19,11 +18,11 @@ namespace Layer.Services
         private bool _exclusive;
         private bool _autoDelete;
         private Dictionary<string, object> arqs;
-        
+
 
         public FilaService()
         {
-            
+
         }
 
         public void ConfigFila(string uri, string queuename, bool durable, bool exclusive, bool autoDelete, Dictionary<string, object> _arqs)
@@ -32,24 +31,24 @@ namespace Layer.Services
             _queueName = queuename;
             _durable = durable;
             _exclusive = exclusive;
-            _autoDelete = autoDelete;            
+            _autoDelete = autoDelete;
             arqs = _arqs;
         }
 
         private void Conectar(string uri)
         {
-            _factory =  new ConnectionFactory { Uri = new Uri(uri) };
+            _factory = new ConnectionFactory { Uri = new Uri(uri) };
             _connection = _factory.CreateConnection();
             _channel = _connection.CreateModel();
         }
 
         public Task Publicar(UsuarioPosicaoShared usuarioPosicao)
         {
-            Conectar(_uri);                                  
+            Conectar(_uri);
             _channel.QueueDeclare(_queueName, _durable, _exclusive, _autoDelete, arqs);
 
-            string message = JsonSerializer.Serialize(usuarioPosicao);            
-            var data = Encoding.UTF8.GetBytes(message);            
+            string message = JsonSerializer.Serialize(usuarioPosicao);
+            var data = Encoding.UTF8.GetBytes(message);
             var exchangeName = "";
             var routingKey = _queueName;
             _channel.BasicPublish(exchangeName, routingKey, null, data);

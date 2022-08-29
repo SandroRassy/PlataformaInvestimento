@@ -1,15 +1,8 @@
-﻿using Layer.Repository.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Layer.Domain.Entities;
+using Layer.Services.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using Microsoft.Extensions.Configuration;
-using Layer.Services.Interfaces;
-using Layer.Services;
-using Layer.Domain.Entities;
+using System.Text;
 
 namespace Layer.Workers
 {
@@ -46,8 +39,8 @@ namespace Layer.Workers
                 }
                 catch (Exception ex)
                 {
-                    var historicotransacoes = new HistoricoTransacoes();    
-                    
+                    var historicotransacoes = new HistoricoTransacoes();
+
                     historicotransacoes.DataTransacao = DateTime.Now;
                     historicotransacoes.Payload = message;
                     historicotransacoes.Obs = $"Erro ao processar o payload. erro: {ex.Message}";
@@ -55,9 +48,9 @@ namespace Layer.Workers
 
                     _historicoTransacoesService.Inserir(historicotransacoes);
                 }
-                
 
-                Console.WriteLine($"Message received: {message}");                
+
+                Console.WriteLine($"Message received: {message}");
             };
 
             channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
@@ -67,7 +60,7 @@ namespace Layer.Workers
         }
 
         private void IniciarFila(string queuename)
-        {            
+        {
             var durable = _configRabbit.Durable;
             var exclusive = _configRabbit.Exclusive;
             var autoDelete = _configRabbit.AutoDelete;
@@ -78,7 +71,7 @@ namespace Layer.Workers
                 { "x-queue-mode", _configRabbit.XQueueMode }
             };
 
-            _filaService.ConfigFila(uri, queuename, durable, exclusive, autoDelete, args);            
+            _filaService.ConfigFila(uri, queuename, durable, exclusive, autoDelete, args);
         }
     }
 }

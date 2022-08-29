@@ -1,6 +1,4 @@
-﻿using Layer.Domain.Entities;
-
-namespace Layer.API.Models.DTO
+﻿namespace Layer.API.Models.DTO
 {
     public class PosicaoDto
     {

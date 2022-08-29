@@ -3,26 +3,20 @@ using Layer.Repository.Interfaces;
 using Layer.Services.Base;
 using Layer.Services.Interfaces;
 using Layer.Services.Models.Shared;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 
 namespace Layer.Services
-{    
+{
     public class UsuarioPosicaoServices : Services<UsuarioPosicao>, IUsuarioPosicaoService
     {
         private readonly IUsuarioPosicaoRepository _usuarioPosicaoRepository;
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly IHistoricoTransacoesService _historicoTransacoesService;
-        private readonly IFilaService _filaService;        
+        private readonly IFilaService _filaService;
         private readonly IConfigRabbit _configRabbit;
-        private double _totalCompra = 0;        
-        public UsuarioPosicaoServices(IUsuarioPosicaoRepository usuarioPosicaoRepository, IUsuarioRepository  usuarioRepository, IFilaService filaService, IConfigRabbit _configrabbit, IHistoricoTransacoesService historicoTransacoesService) : base(usuarioPosicaoRepository)
+        private double _totalCompra = 0;
+        public UsuarioPosicaoServices(IUsuarioPosicaoRepository usuarioPosicaoRepository, IUsuarioRepository usuarioRepository, IFilaService filaService, IConfigRabbit _configrabbit, IHistoricoTransacoesService historicoTransacoesService) : base(usuarioPosicaoRepository)
         {
             _usuarioPosicaoRepository = usuarioPosicaoRepository;
             _usuarioRepository = usuarioRepository;
@@ -35,21 +29,21 @@ namespace Layer.Services
         {
             var usuario = _usuarioRepository.QueryFilter(usuarioposicao.CPF);
 
-            if(usuario != null) 
+            if (usuario != null)
             {
                 var posicao = _usuarioPosicaoRepository.QueryFilter(usuarioposicao.CPF);
 
                 if (posicao != null)
                 {
-                    if(usuarioposicao.Positions.Count == 0)
+                    if (usuarioposicao.Positions.Count == 0)
                         throw new Exception($"Lista de compra não pode estar vazia.");
 
-                    if(posicao.CheckingAccountAmount == 0)
+                    if (posicao.CheckingAccountAmount == 0)
                         throw new Exception($"Usuário não tem saldo suficiente.");
 
                     //validar se o cliente tem saldo para comprar as ações
                     if (VerificarSaldoConta(usuarioposicao, posicao.CheckingAccountAmount))
-                    {                        
+                    {
                         Dictionary<string, object> args = new Dictionary<string, object>()
                         {
                             { "x-queue-mode", _configRabbit.XQueueMode }
@@ -61,7 +55,7 @@ namespace Layer.Services
 
                     }
                     else
-                         throw new Exception($"Usuário não tem saldo suficiente.");
+                        throw new Exception($"Usuário não tem saldo suficiente.");
                 }
                 else
                 {
@@ -97,19 +91,19 @@ namespace Layer.Services
         }
 
         private double TotalValorPosicoes(UsuarioPosicao usuarioposicao)
-        {            
+        {
             double valor = 0;
             foreach (var posicao in usuarioposicao.Positions)
             {
                 valor = +(posicao.CurrentPrice * double.Parse(posicao.Amount));
-            }   
+            }
             return valor;
         }
 
         private UsuarioPosicaoShared FillPayload(UsuarioPosicao usuarioposicao)
         {
             var retorno = new UsuarioPosicaoShared();
-            retorno.CPF = usuarioposicao.CPF;            
+            retorno.CPF = usuarioposicao.CPF;
 
             foreach (var posicao in usuarioposicao.Positions)
             {
@@ -137,9 +131,9 @@ namespace Layer.Services
 
         public void Processar(string payload)
         {
-            var _payload = JsonSerializer.Deserialize<UsuarioPosicaoShared>(payload);                     
+            var _payload = JsonSerializer.Deserialize<UsuarioPosicaoShared>(payload);
 
-            if ( _payload != null)
+            if (_payload != null)
             {
                 var historicotransacoes = new HistoricoTransacoes();
                 historicotransacoes.CPF = _payload.CPF;
@@ -155,7 +149,7 @@ namespace Layer.Services
                     if (VerificarSaldoConta(posicaoNova, posicaoAtual.CheckingAccountAmount))
                     {
                         //debitar o valor da compra
-                        posicaoAtual.CheckingAccountAmount = posicaoAtual.CheckingAccountAmount - _totalCompra;                        
+                        posicaoAtual.CheckingAccountAmount = posicaoAtual.CheckingAccountAmount - _totalCompra;
 
                         if (posicaoAtual.Positions == null)
                             posicaoAtual.Positions = new List<Posicao>();
@@ -181,7 +175,7 @@ namespace Layer.Services
                     historicotransacoes.Status = 2;
                 }
                 _historicoTransacoesService.Inserir(historicotransacoes);
-            }           
+            }
         }
     }
 }

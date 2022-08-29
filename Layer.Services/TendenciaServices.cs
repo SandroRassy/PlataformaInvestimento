@@ -1,14 +1,7 @@
 ﻿using Layer.Domain.Entities;
-using Layer.Repository;
 using Layer.Repository.Interfaces;
 using Layer.Services.Base;
 using Layer.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Layer.Services
 {
@@ -37,7 +30,7 @@ namespace Layer.Services
             else
             {
                 throw new Exception($"Valor da currentprice não esta no formatado.");
-            }            
+            }
         }
 
         public Tendencia QueryFilter(string symbol)

@@ -5,7 +5,6 @@ using Layer.Repository.Context;
 using Layer.Repository.Interfaces;
 using Layer.Services;
 using Layer.Services.Interfaces;
-using Layer.Services.Models.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
