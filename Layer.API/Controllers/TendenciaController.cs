@@ -22,7 +22,7 @@ namespace Layer.API.Controllers
         {
             try
             {
-                return Ok(_tendenciaServices.QueryAll());
+                return Ok(_tendenciaServices.QueryAll());                
             }
             catch (Exception exception)
             {

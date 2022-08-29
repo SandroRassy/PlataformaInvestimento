@@ -4,13 +4,9 @@ namespace Layer.API.Models.DTO
 {
     public class UsuarioPosicaoDto
     {
-        public string CPF { get; set; }
-        public List<PosicaoDto> Positions { get; set; }
-
-        public UsuarioPosicaoDto(string cPF, List<PosicaoDto> positions)
-        {
-            CPF = cPF;
-            Positions = positions;
-        }
+        public string cpf { get; set; }
+        public string symbol { get; set; }
+        public string amount { get; set; }        
+        
     }
 }

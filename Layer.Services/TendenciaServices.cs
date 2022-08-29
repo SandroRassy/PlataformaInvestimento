@@ -39,5 +39,11 @@ namespace Layer.Services
                 throw new Exception($"Valor da currentprice não esta no formatado.");
             }            
         }
+
+        public Tendencia QueryFilter(string symbol)
+        {
+            var result = _tendenciaRepository.QueryFilter(symbol);
+            return result;
+        }
     }
 }
