@@ -1,7 +1,10 @@
 ﻿using Layer.API.Models.DTO;
 using Layer.Domain.Entities;
+using Layer.Repository.Interfaces;
+using Layer.Services;
 using Layer.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,9 +15,11 @@ namespace Layer.API.Controllers
     public class UsuarioPosicaoController : ControllerBase
     {
         private readonly IUsuarioPosicaoService _usuarioPosicaoServices;
-        public UsuarioPosicaoController(IUsuarioPosicaoService usuarioPosicaoServices)
+        private readonly ITendenciaService _tendenciaServices;
+        public UsuarioPosicaoController(IUsuarioPosicaoService usuarioPosicaoServices, ITendenciaService tendenciaServices)
         {
             _usuarioPosicaoServices = usuarioPosicaoServices;
+            _tendenciaServices = tendenciaServices;
         }        
 
         // GET api/<UsuarioPosicaoController>/5
@@ -37,10 +42,21 @@ namespace Layer.API.Controllers
         {
             try
             {
-                UsuarioPosicao posicao = PosicaoFill(value);
+                
+                
+                var valorProduto = _tendenciaServices.QueryFilter(value.symbol);
+                if(valorProduto != null)
+                {
+                    UsuarioPosicao posicao = PosicaoFill(value, valorProduto.CurrentPrice);
 
-                _usuarioPosicaoServices.Inserir(posicao);
-                return Ok();
+                    _usuarioPosicaoServices.Inserir(posicao);
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest($"Produto não encontrado.");
+                }
+                
             }
             catch (Exception exception)
             {
@@ -48,17 +64,13 @@ namespace Layer.API.Controllers
             }
         }
 
-        private static UsuarioPosicao PosicaoFill(UsuarioPosicaoDto value)
+        private static UsuarioPosicao PosicaoFill(UsuarioPosicaoDto value, double valor)
         {
             var posicao = new UsuarioPosicao();
-            posicao.CPF = value.CPF;
-            posicao.Positions = new List<Posicao>();
 
-            foreach (var item in value.Positions)
-            {
-                var objPosicao = new Posicao(item.Symbol, item.Amount, item.CurrentPrice);
-                posicao.Positions.Add(objPosicao);
-            }
+            posicao.CPF = value.cpf;
+            posicao.Positions = new List<Posicao>();            
+            posicao.Positions.Add(new Posicao(value.symbol, value.amount, valor));            
 
             return posicao;
         }

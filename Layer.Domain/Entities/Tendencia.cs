@@ -19,5 +19,10 @@ namespace Layer.Domain.Entities
             Symbol = symbol;
             CurrentPrice = currentPrice;
         }
+
+        public Tendencia()
+        {
+
+        }
     }
 }

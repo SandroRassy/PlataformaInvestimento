@@ -19,6 +19,16 @@ namespace Layer.Repository
         public TendenciaRepository(IConnectionFactory connectionFactory, string databaseName, string collectionName)
             : base(connectionFactory, databaseName, collectionName)
         {
-        }        
+        }
+
+        public Tendencia QueryFilter(string symbol)
+        {
+            var retorno = new Tendencia();
+
+            if (!String.IsNullOrEmpty(symbol))
+                retorno = _collectionName.AsQueryable<Tendencia>().FirstOrDefault(w => w.Symbol == symbol);
+
+            return retorno;
+        }
     }
 }
