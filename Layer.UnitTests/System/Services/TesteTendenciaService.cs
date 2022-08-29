@@ -12,6 +12,6 @@ namespace Layer.UnitTests.System.Services
 
             /// Assert
             result.Should().NotBeEmpty();
-        }        
+        }
     }
 }

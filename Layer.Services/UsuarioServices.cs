@@ -1,17 +1,11 @@
-﻿using Layer.Domain.Entities;
-using Layer.Repository;
+﻿using DocumentValidator;
+using Layer.Domain.Entities;
 using Layer.Repository.Interfaces;
 using Layer.Services.Base;
 using Layer.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DocumentValidator;
 
 namespace Layer.Services
-{    
+{
     public class UsuarioServices : Services<Usuario>, IUsuarioService
     {
         private readonly IUsuarioRepository _usuarioRepository;

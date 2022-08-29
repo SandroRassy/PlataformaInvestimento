@@ -22,7 +22,7 @@ namespace Layer.API.Controllers
         {
             try
             {
-                return Ok(_tendenciaServices.QueryAll());                
+                return Ok(_tendenciaServices.QueryAll());
             }
             catch (Exception exception)
             {
@@ -42,15 +42,15 @@ namespace Layer.API.Controllers
         public ActionResult Post([FromBody] TendenciaDto value)
         {
             try
-            {                
-                _tendenciaServices.Inserir(value.Symbol, value.CurrentPrice);                
+            {
+                _tendenciaServices.Inserir(value.Symbol, value.CurrentPrice);
 
                 return Ok(value);
             }
             catch (Exception exception)
-            {                
+            {
                 return BadRequest($"Erro: {exception.Message}");
             }
-        }        
+        }
     }
 }

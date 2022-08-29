@@ -1,5 +1,4 @@
 ﻿using Layer.API.Models.DTO;
-using Layer.Services;
 using Layer.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,7 +28,7 @@ namespace Layer.API.Controllers
             {
                 return BadRequest($"Erro: {exception.Message}");
             }
-        }        
+        }
 
         // POST api/<UsuarioController>
         [HttpPost]
@@ -46,6 +45,6 @@ namespace Layer.API.Controllers
                 return BadRequest($"Erro: {exception.Message}");
             }
         }
-        
+
     }
 }
